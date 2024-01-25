@@ -1,0 +1,18 @@
+body{
+    background-color: #fffacd;
+}
+#title_boy{
+    position: relative;
+    top: 30%;
+    left: 10%;
+}
+#title_girl{
+    position: relative;
+    top: 30%;
+    left: 60%;
+}
+#title_button{
+    position: absolute;
+    top: 80%;
+    left: 50%;
+}

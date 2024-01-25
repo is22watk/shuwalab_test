@@ -1,0 +1,33 @@
+/* #white{
+    position: absolute;
+    border-radius: 5%;
+    opacity: 80%;
+    top: 10%;
+    left: 5%;
+    width: 90%;
+    height: 80%;
+    background-color: white;
+    z-index: 10;
+} */
+canvas{
+    background-color: black;
+}
+.container{
+    transform: scale(50%);
+}
+#countdown{
+    position: absolute;
+    top: 40%;
+    left: 45%;
+    font-size: 200px;
+    color: aliceblue;
+    z-index: 11;
+}
+#camera_overlay {
+    position: absolute;
+    opacity: 70%;
+    width: 1800px;
+    height: 1100px;
+    background-color: grey;
+    z-index: 10;
+}

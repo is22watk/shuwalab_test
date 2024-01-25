@@ -1,0 +1,26 @@
+.cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    cursor: none;
+    z-index: 999;
+    transform: translate(-50%, -50%);
+}
+
+.cimg {
+    filter: drop-shadow(1px 1px 2px rgb(136, 136, 0));
+    width: 80px;
+    height: 80px;
+}
+
+#touch {
+    display: none;
+}
+
+#Xrange{
+    display: none;
+}
+
+#Yrange{
+    display: none;
+}

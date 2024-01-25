@@ -1,0 +1,55 @@
+#white{
+    position: absolute;
+    border-radius: 5%;
+    opacity: 80%;
+    top: 5%;
+    left: 10%;
+    width: 80%;
+    height: 40%;
+    background-color: white;
+}
+#easy{
+    background-color: aqua;
+    border-color: rgb(0, 204, 255);
+    position: absolute;
+    top: 80%;
+    left: 30%;
+    width: 15%;
+    height: 10%;
+}
+#difficult{
+    background-color: pink;
+    border-color: rgb(250, 159, 167);
+    position: absolute;
+    top: 80%;
+    left: 60%;
+    width: 15%;
+    height: 10%;
+}
+#cate2{
+    position: absolute;
+    top: 40%;
+}
+.category2{
+    position: relative;
+    padding: 55px;
+    width: 10%;
+    height: 10%;
+}
+.category2-active{
+    padding: 55px;
+    width: 12%;
+    height: 12%;
+}
+#a{
+    position: absolute;
+    top: 5%;
+    left: 40%;
+    font-size: 64px;
+}
+#b{
+    position: absolute;
+    top: 20%;
+    left: 35%;
+    font-size: 32px;    
+}

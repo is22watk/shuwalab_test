@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手話ラボ</title>
+
+    <link href="./css/title.css" rel="stylesheet">
+    <link href="./css/menu.css" rel="stylesheet">
+    <link href="./css/practice_mode.css" rel="stylesheet">
+    <link href="./css/test_mode.css" rel="stylesheet">
+    <link href="./css/hand_sign.css" rel="stylesheet">
+    <link href="./css/camera.css" rel="stylesheet">
+    <link href="./css/cursor.css" rel="stylesheet">
+    <link href="./css/result.css" rel="stylesheet">
+    <link href="./css/test_result.css" rel="stylesheet">
+</head>
+<body>
+  <input type="range" id="Xrange" min="0" max="6" step="0.1" value="5">
+  <input type="range" id="Yrange" min="0" max="4" step="0.1" value="3">
+  
+  <div id="main">
+      <!-- カーソル -->
+      <div id="cursor" class="cursor">
+          <img id="hand" class="cimg" src="img/hand/janken_pa.png" alt="手" srcset="" />
+          <img id="touch" class="cimg" src="img/hand/janken_gu.png" alt="手" srcset="" />
+      </div>
+    <!-- タイトル画面 -->
+  <div id="title">
+    <h1>手話ラボ</h1>
+    <img id="title_boy" src="img/title/title_boy.png" >
+    <img id="title_girl" src="img/title/title_girl.png">
+    <button id="title_button">手をかざしてね！</button>
+  </div>
+
+    <!-- メニュー -->
+  <div id="menu" style="display: none;">
+      <div id="practice_mode">
+        <img src="img/menu/renshu.png">
+      </div>
+      <div id="test_mode">
+        <img src="img/menu/honban.png">
+      </div>
+  </div>
+
+    <!-- 手話選択（練習モードスタート画面） -->
+  <div id="start_practice_mode" style="display: none;">
+    <!-- <video controls autoplay muted loop src="mp4/ohayou.mp4" width="500px" height="600px"></video>
+    <video controls autoplay muted loop src="mp4/konnitiha.mp4" width="500px" height="600px"></video>
+    <video controls autoplay muted loop src="mp4/konbanwa.mp4" width="500px" height="600px"></video> -->
+    <!-- <img id="black_board" src="img/practice_mode/black_board.png"> -->
+    <img class="back" src="img/practice_mode/back.png" onclick="change_menu()">
+
+    <div id="sakusen1">
+      <div id="cate">
+        <img class="category" id="1" src="img/practice_mode/greeting.png"   onclick="change_category()">
+        <img class="category" id="2" src="img/practice_mode/often_use.png"  onclick="change_category()">
+        <img class="category" id="3" src="img/practice_mode/feeling.png"    onclick="change_category()">
+        <img class="category" id="4" src="img/practice_mode/question.png"   onclick="change_category()">
+        <img class="category" id="5" src="img/practice_mode/action.png"     onclick="change_category()">
+        <img class="category" id="6" src="img/practice_mode/yamagata.png"   onclick="change_category()">
+      </div>
+
+      <div class="data_menu">
+        <div id="greeting" data-sc="01" style="display: flex;flex-wrap: wrap;justify-content: center;">
+          <img class="gree" id="konnitiha"      src="img/practice_mode/konitiha.png"    width="300px" height="250px" data="1" onclick="changeVideo('mp4/aisatu_konnitiha.mp4')">
+          <img class="gree" id="gomennasai"     src="img/practice_mode/gomennnasai.png" width="300px" height="250px" data="2" onclick="changeVideo('mp4/aisatu_gomennasai.mp4')">
+          <img class="gree" id="arigatou"       src="img/practice_mode/arigatou.png"    width="300px" height="250px" data="3" onclick="changeVideo('mp4/aisatu_arigatou.mp4')">
+          <img class="gree" id="ohisasiburi"    src="img/practice_mode/ohisasiburi.png" width="300px" height="250px" data="2" onclick="changeVideo('mp4/aisatu_ohisasiburi.mp4')">
+          <img class="gree" id="otukaresama"    src="img/practice_mode/otukaresama.png" width="300px" height="250px" data="3" onclick="changeVideo('mp4/aisatu_otukaresama.mp4')">
+        </div>
+          
+        <div id="often_use" data-sc="02" style="display: none;">
+          <img class="gree" id="shuwa"         src="img/practice_mode/shuwa.png"      width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_shuwa.mp4')">
+          <img class="gree" id="wakaru"        src="img/practice_mode/wakaru.png"     width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_wakaru.mp4')">
+          <img class="gree" id="wakaranai"     src="img/practice_mode/wakaranai.png"  width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_wakaranai.mp4')">
+          <img class="gree" id="kyo"           src="img/practice_mode/kyo.png"        width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_kyo.mp4')">
+          <img class="gree" id="asu"           src="img/practice_mode/asu.png"        width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_asu2.mp4')">
+          <img class="gree" id="kinou"         src="img/practice_mode/kinou.png"      width="300px" height="250px" onclick="changeVideo('mp4/yokutukau_kinou2.mp4')">
+        </div>
+
+        <div id="feeling" data-sc="03" style="display: none;">
+          <img class="gree" id="tanosii"      src="img/practice_mode/tanosii.png"   width="300px" height="250px" onclick="changeVideo('mp4/kimoti_tanosii.mp4')">
+          <img class="gree" id="ganbaru"      src="img/practice_mode/ganbaru.png"   width="300px" height="250px" onclick="changeVideo('mp4/kimoti_ganbaru.mp4')">
+          <img class="gree" id="bikkuri"      src="img/practice_mode/bikkuri.png"   width="300px" height="250px" onclick="changeVideo('mp4/kimoti_bikkuri.mp4')">
+          <img class="gree" id="kanasii"      src="img/practice_mode/kanasii.png"   width="300px" height="250px" onclick="changeVideo('mp4/kimoti_kanasii2.mp4')">
+          <img class="gree" id="tukareru"  src="img/practice_mode/tukareru.png"  width="300px" height="250px" onclick="changeVideo('mp4/kimoti_tukareru.mp4')">
+          <img class="gree" id="suki"         src="img/practice_mode/suki.png"      width="300px" height="250px" onclick="changeVideo('mp4/kimoti_suki.mp4')">
+        </div>
+
+        <div id="question" data-sc="04" style="display: none;">
+          <img class="gree" id="nani"         src="img/practice_mode/nani.png" width="300px" height="250px" onclick="changeVideo('mp4/gimon_nani.mp4')">
+          <img class="gree" id="dare"         src="img/practice_mode/dare.png" width="300px" height="250px" onclick="changeVideo('mp4/gimon_dare.mp4')">
+          <img class="gree" id="naze"         src="img/practice_mode/naze.png" width="300px" height="250px" onclick="changeVideo('mp4/gimon_naze.mp4')">
+        </div>
+
+        <div id="action" data-sc="05" style="display: none;">
+          <img class="gree" id="tasukeru"   src="img/practice_mode/tasukeru.png"  width="300px" height="250px" onclick="changeVideo('mp4/koudou_tasukeru.mp4')">
+          <img class="gree" id="tatu"       src="img/practice_mode/tatu.png"      width="300px" height="250px" onclick="changeVideo('mp4/koudou_tatu.mp4')">
+          <img class="gree" id="taberu"     src="img/practice_mode/taberu.png"    width="300px" height="250px" onclick="changeVideo('mp4/koudou_taberu.mp4')">
+          <img class="gree" id="iku"        src="img/practice_mode/iku.png"       width="300px" height="250px" onclick="changeVideo('mp4/koudou_iku.mp4')">
+          <img class="gree" id="suwaru"     src="img/practice_mode/suwaru.png"    width="300px" height="250px" onclick="changeVideo('mp4/koudou_suwaru.mp4')">
+        </div>
+
+        <div id="yamagata" data-sc="06" style="display: none;">
+          <img class="gree" id="hanagasa"   src="img/practice_mode/hanagasa.png"  width="300px" height="250px" onclick="changeVideo('mp4/yamagata_hanagasa.mp4')">
+          <img class="gree" id="yama"       src="img/practice_mode/yama.png"      width="300px" height="250px" onclick="changeVideo('mp4/yamagata_yama.mp4')">
+          <img class="gree" id="sakuranbo"  src="img/practice_mode/sakuranbo.png" width="300px" height="250px" onclick="changeVideo('mp4/yamagata_sakuranbo.mp4')">
+          <img class="gree" id="onsen"      src="img/practice_mode/onsen.png"     width="300px" height="250px" onclick="changeVideo('mp4/yamagata_onsen.mp4')">
+          <img class="gree" id="rahuransu"  src="img/practice_mode/rahuransu.png" width="300px" height="250px" onclick="changeVideo('mp4/yamagata_rahuransu.mp4')">
+        </div>
+      </div>
+  </div>
+  </div>
+  
+    <!-- 手話 -->
+  <div id="hand_sign" style="display: none;">
+    <div class="white"></div>
+    <div id="hint"></div>
+    <video id="myVideo" width="500px" height="600px" autoplay muted loop>
+    <source id="videoSource" src="" type="video/mp4">
+    </video>
+  <img class="back" src="img/practice_mode/back.png" onclick="change_practice_mode()">
+
+    <button id="yattemiru">やってみる</button>
+  </div>
+    <!-- カメラ -->
+  <div id="camera" style="display: none;">
+  <div id="Q"></div>
+  <div id="countdown"></div>
+  <div class="container">
+    <div id="camera_overlay"></div>
+    <video class="input_video" style="display: none;"></video>
+    <canvas class="output_canvas" width="1800px" height="1100px" style="transform: scaleX(-1)"></canvas>
+  </div>
+  <img class="back" src="img/practice_mode/back.png" onclick="change_hand_sign()">
+    <!-- <canvas id="output_canvas" width="1280px" height="720px" style="transform: scaleX(-1)"></canvas> -->
+  </div>
+
+  </div>
+    <!-- 評価 -->
+  <div id="result" style="display: none;">
+    <div class="white"></div>
+    <img class="hyoka" id="good" src="img/result/good.png" style="display: none;">
+    <img class="hyoka" id="great" src="img/result/great.png" style="display: none;">
+    <img class="hyoka" id="fight" src="img/result/fight.png" style="display: none;">
+    <img id="hanamaru" src="img/result/hanamaru.png" style="display: none;">
+
+    <div id="output1"></div>
+    <div id="output2"></div>
+
+    <button id="back" onclick="change_practice_mode()">一覧に戻る</button>
+    <button id="re" onclick="change_camera()">もう一度</button>
+  </div>
+  <!-- 手話クイズ（本番モードスタート画面） -->
+  <div id="start_test_mode" style="display: none;">
+    <button id="easy">かんたん</button>
+    <button id="difficult">むずかしい</button>
+    <div id="white"></div>
+    <p id="a">手話クイズ</p>
+    <p id="b">クイズを解いて実力を確かめよう！<br>
+      &emsp;手話を行って精度を図るよ！<br>
+      下のボタンからカテゴリを選んでね！！</p>
+    <img class="back" src="img/practice_mode/back.png" onclick="change_menu()">
+    
+    <div id="cate2">
+      <img class="category2" id="greeting"    src="img/practice_mode/greeting.png" onclick="change_category()">
+      <img class="category2" id="often_use"   src="img/practice_mode/often_use.png" onclick="change_category()">
+      <img class="category2" id="feeling"     src="img/practice_mode/feeling.png" onclick="change_category()">
+      <img class="category2" id="question"    src="img/practice_mode/question.png" onclick="change_category()">
+      <img class="category2" id="action"      src="img/practice_mode/action.png" onclick="change_category()">
+      <img class="category2" id="yamagata"    src="img/practice_mode/yamagata.png" onclick="change_category()">
+    </div>
+  </div>
+  <!-- クイズ -->
+  <div id="quiz" style="display: none;">
+    <div class="white"></div>
+    <button id="c" onclick="change_camera()">cheat</button>
+    <img class="back" src="img/practice_mode/back.png" onclick="change_test_mode()">
+  </div>
+    <!-- クイズ（カメラ） -->
+  <div id="quiz_camera" style="display: none;">
+    <div class="white"></div>
+    <button id="cheat" onclick="change_config()">cheat</button>
+    <img class="back" src="img/practice_mode/back.png" onclick="change_quiz()">
+  </div>
+    <!-- クイズ（確認） -->
+  <div id="config" style="display: none;">
+    <div class="white"></div>
+    <button id="cheat" onclick="change_ans()">cheat</button>
+    <img class="back" src="img/practice_mode/back.png" onclick="change_config()">
+  </div>
+    <!-- クイズ（答え） -->
+  <div id="ans" style="display: none;">
+    <div class="white"></div>
+    <button id="cheat" onclick="change_test_result1()">cheat</button>
+  </div>
+    <!-- クイズ（テスト結果１） -->
+    <div id="test_result1" style="display: none;">
+      <div class="white"></div>
+      <button id="cheat" onclick="change_test_result2()">cheat</button>
+      <img id="hanamaru" src="img/result/hanamaru.png">
+      <p id="c">あなたの正答率は...</p>
+      <div id="seitosu"></div>
+      <img class="hyoka" src="img/test_result/pen_boy.png">
+    </div>
+    <!-- クイズ（テスト結果２） -->
+    <div id="test_result2" style="display: none;">
+      <div class="white"></div>
+      <p id="d">おつかれさま</p>
+      <p id="e">豆知識</p>
+      <div id="trivia"></div>
+      <button id="cheat" onclick="change_test_mode()">cheat</button>
+      <img id="hanamaru" src="img/result/hanamaru.png">
+      <img class="hyoka" src="img/test_result/hand_boy.png">
+    </div>
+
+    <!-- 画面切り替え -->
+    <script src='./node_modules/@mediapipe/camera_utils/camera_utils.js'></script>
+    <script src='./node_modules/@mediapipe/drawing_utils/drawing_utils.js'></script>
+    <script src='./node_modules/@mediapipe/hands/hands.js'></script>
+    <script src='./node_modules/@mediapipe/holistic/holistic.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    
+    <!-- tensorflowjsのライブラリ -->
+    <script src='./node_modules/@tensorflow/tfjs/dist/tf.js'></script>
+
+    <script src="./js/cleanData.js"></script>
+
+    <script src="./js/main.js"></script>
+
+    <!-- 手話モデル -->
+    <script src="./js/gesture.js"></script>
+    
+    <!-- カーソル移動 -->
+    <script src="./js/cursor.js"></script>
+    <script src="./js/change.js"></script>
+<script>
+window.addEventListener('load',function(){
+  document.getElementById('title_button').addEventListener('click', function(){
+      change_menu();
+  }, false);
+  document.getElementById('practice_mode').addEventListener('click', function(){
+      change_practice_mode();
+  }, false);
+  document.getElementById('test_mode').addEventListener('click', function(){
+      change_test_mode();
+  }, false);
+
+
+  // document.getElementsByClassName('gree').addEventListener('click', function(){
+  //     change_hand_sign();
+  // }, false);
+
+
+  document.getElementById('yattemiru').addEventListener('click', function(){
+      change_camera();
+  }, false);
+  document.getElementById('cheat').addEventListener('click', function(){
+      change_result();
+  }, false);
+  document.getElementById('easy').addEventListener('click', function(){
+      change_quiz();
+  }, false);
+
+
+}, false);
+
+
+// 動画を切り替える関数
+function changeVideo(newSource) {
+    change_hand_sign()
+      // video要素とsource要素を取得
+      var video = document.getElementById('myVideo');
+      var source = document.getElementById('videoSource');
+
+      // 新しい動画のソースを設定
+      source.src = newSource;
+
+      // 動画を再読み込み
+      video.load();
+    }
+
+
+
+</script>
+</body>
+</html>

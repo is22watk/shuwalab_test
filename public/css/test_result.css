@@ -1,0 +1,28 @@
+#c{
+    position: absolute;
+    top: 20%;
+    left: 35%;
+    font-size: 64px;
+    z-index: 10;
+}
+#d{
+    position: absolute;
+    top: 20%;
+    left: 35%;
+    font-size: 84px;
+    z-index: 10;
+}
+#e{
+    position: absolute;
+    top: 50%;
+    left: 35%;
+    font-size: 64px;
+    z-index: 10;
+}
+#trivia{
+    position: absolute;
+    top: 70%;
+    left: 40%;
+    font-size: 48px;
+    z-index: 10;
+}

@@ -1,0 +1,48 @@
+.hyoka{
+    position: absolute;
+    top: 20%;
+    left: 5%;
+    z-index: 10;
+}
+#good{
+
+}
+#great{
+
+}
+#fight{
+
+}
+#hanamaru{
+    position: absolute;
+    left: 65%;
+    width: 30%;
+    height: 40%;
+    z-index: 10;
+}
+#output1{
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    font-size: 100px;
+    z-index:10;
+}
+#output2{
+    position: absolute;
+    top: 60%;
+    left: 40%;
+    font-size: 50px;
+    z-index: 10;
+}
+#back{
+    position: absolute;
+    top: 80%;
+    left: 60%;
+    z-index:10;
+}
+#re{
+    position: absolute;
+    top: 80%;
+    left: 70%;
+    z-index:10;
+}

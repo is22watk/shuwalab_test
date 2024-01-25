@@ -1,0 +1,43 @@
+#black_board{
+    position: relative;
+    left: 5%;
+    width: 1700px;
+    height: 700px;
+}
+.category{
+    padding: 55px;
+    width: 10%;
+    height: 10%;
+}
+.gree{
+    justify-content: space-around;
+    border-radius:30px;
+    flex-wrap: wrap;
+    margin-right:100px;
+    margin-left: 100px;
+    margin-bottom:100px;
+}
+.data_menu{
+    width:80%;
+    margin-right: auto;
+    margin-left: auto; 
+}
+.category-active{
+    padding: 55px;
+    width: 12%;
+    height: 12%;
+}
+.back{
+    position: absolute;
+    opacity: 60%;
+    top: 5%;
+    left: 5%;
+    width: 200px;
+    height: 200px;
+    z-index: 10;
+}
+#sakusen1{
+    display: flex;
+    flex-direction: column-reverse;
+    margin-top:100px;
+}
