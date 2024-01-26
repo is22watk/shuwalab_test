@@ -24,7 +24,6 @@ class GesturePredictor {
 
     async predictGesture(landmark_list, modelPath) {
         const model = await this.loadModel(modelPath);
-        // const inputTensor = tf.tensor2d(landmark_list, [1, landmark_list.length], 'float32');
         const inputTensor = tf.tensor2d(landmark_list, [1, landmark_list.length], 'float32');
         const predictResult = model.predict(inputTensor);
         const gestureId = tf.argMax(tf.squeeze(predictResult)).dataSync()[0];
@@ -40,8 +39,6 @@ class GesturePredictor {
         }
 
         const { gestureId, predictResult } = await this.predictGesture(data, modelPath);
-        // console.log("data",data)
-        // console.log("data.length",data.length)
         const gestureResult = predictResult[gestureId];
         let gestureid = gestureId;
         let gestureresult = gestureResult;
@@ -95,7 +92,6 @@ function pre_process_pose(pose_history){
     let div_value;
     let pre_pose;
     let flame_mask = temp_pose_list[1].length;
-    // console.log("flame_mask",flame_mask)
     for(flame=0;flame<16;flame++){
     // for(flame=0;flame<6;flame++){
 
@@ -115,7 +111,7 @@ function pre_process_pose(pose_history){
             temp_pose_list[point][flame][1] = (temp_pose_list[point][flame][1] - center_point[1]) / div_value
         }
     }
-    // console.log("temp_pose_list.length::",temp_pose_list.length)
+
     if (temp_pose_list.length < 32) {
         for (let point = 0; point < temp_pose_list.length; point++) {
           for (let i = flame_mask; i < 32; i++) {
@@ -123,7 +119,6 @@ function pre_process_pose(pose_history){
           }
         }
       }      
-    // console.log("temp_pose_list[point]::",temp_pose_list[point])
     
     for(point=0;point<temp_pose_list.length;point++){
         temp_pose_list[point]=temp_pose_list[point].flat();
@@ -139,7 +134,7 @@ function pre_process_hands(hands_history){
     let max_value;
     let flame_mask = temp_hands_list[1].length;
     // console.log("flame_mask",flame_mask)
-    // console.log("temp_hands_list::",temp_hands_list)
+    console.log("temp_hands_list::",temp_hands_list)
 
     for(num=0;num<temp_hands_list.length;num++){
         //console.log("temp_hands_list.length::",temp_hands_list.length)
@@ -147,14 +142,14 @@ function pre_process_hands(hands_history){
             temp_hands_list[num][flame][0] = temp_hands_list[num][flame][0] - hand_history[0][flame][0]
             temp_hands_list[num][flame][1] = temp_hands_list[num][flame][1] - hand_history[0][flame][1]
             // console.log("相対 x  y")
-            // console.log("場合",temp_hands_list[num][flame][0],temp_hands_list[num][flame][1])
+            // console.log(temp_hands_list[num][flame][0],temp_hands_list[num][flame][1])
         }
         // temp_hands_list[num]=temp_hands_list[num].flat();
     }
-    if (temp_hands_list.length < 32) {
-        for (let num = 0; num < temp_hands_list.length; num++) {
+    if (temp_hands_list < 32) {
+        for (let num = 0; num < temp_hands_list; num++) {
           for (let i = flame_mask; i < 32; i++) {
-            temp_hands_list[num].push([-1000, -1000]);
+            temp_landmark_list[num].push([-1000, -1000]);
           }
           // 一次元リストに変換
           temp_hands_list[num]=temp_hands_list[num].flat();
@@ -165,14 +160,11 @@ function pre_process_hands(hands_history){
 
     try{
         // max_value=Math.max(...temp_hands_list.map(Math.abs))
-        if(temp_hands_list != -1000){
-            max_value=Math.max(...temp_hands_list.map(Math.abs))
-            }
-        // max_value = Math.max(
-        //     Array.from(temp_landmark_list)
-        //       .filter(n => n !== -1000)
-        //       .map(n => Math.abs(n))
-        //   );
+        max_value = Math.max(
+            Array.from(temp_landmark_list)
+              .filter(n => n !== -1000)
+              .map(n => Math.abs(n))
+          );
           
     }
     catch(error){
@@ -217,7 +209,6 @@ async function recognition(gestures){
     
     let pose_history=gestures[0];
     let left_history=gestures[1];
-    // console.log("gestures[1]::",gestures[1])
     let right_history=gestures[2];
     // let n=gesturse[3];
     let n=2;
@@ -235,25 +226,21 @@ async function recognition(gestures){
     let most_gesture_id;
     //console.log(pose_history[0])
     // if (pose_history[0].length==16){
-    // console.log("段階1")
+    console.log("段階1")
     // console.log(pose_history[0]);
-    // if (pose_history[0].length==16){
-    // if (pose_history[0].length==16){
+    if (pose_history[0].length==16){
         pre_pose=pre_process_pose(pose_history);
-        // console.log("段階２",pre_pose,pre_pose.length)
+        console.log("段階２")
         pre_left=pre_process_hands(left_history);
         pre_right=pre_process_hands(right_history);
-        // console.log("段階３",pre_left,pre_left.length)
+        console.log("段階３")
         pre_data=pre_pose.concat(pre_left,pre_right);
-        // console.log("段階４")
-        // console.log("pre_data",pre_data)
-        // console.log("pre_data(len)",pre_data.length)
+
         pre_data = pre_data.map((x) => {
             return x === -1000 ? -3 : x;
           });
         try {
             const ges = await gesturePredictor.gesture(pre_data, n);
-            // console.log("ges::",ges)
             gesture_id = ges.gestureid;
             gesture_result = ges.gestureresult;
 
@@ -264,61 +251,9 @@ async function recognition(gestures){
                 let result_text;
                 let box;
                 console.log(cnt)
-                // if (cnt < 16) {
-                if (cnt < 32) {
+                if (cnt < 16) {
+                // if (cnt < 32) {
                     cnt += 1;
-                    if(cnt > 16){
-                        if (percent > 0.999) {
-                            console.log(gesture_history)
-                            const data = await fetch('/model/label.csv').then(response => response.text());
-                            const rows = data.split('\n').map(row => row.trim());
-                            const labels = rows.map(row => row.split(',')[0]);
-                            result_text = labels[gesture_id];
-                            box=[result_text,percent];
-                            console.log(result_text);
-                            console.log("ok0.999");
-                            postMessage(box);
-                            // gesture_history = [];
-                            gesture_history.splice(0,gesture_history.length);
-                            cnt=0;
-                        }
-                        if (percent > 0.90) {
-                            gesture_history.push(gesture_id);
-                            console.log(gesture_history)
-                            most_gesture_id = getMostCommonGestureId(gesture_history);
-                            if (most_gesture_id.count >= 3) {
-                                const data = await fetch('/model/label.csv').then(response => response.text());
-                                const rows = data.split('\n').map(row => row.trim());
-                                const labels = rows.map(row => row.split(',')[0]);
-                                result_text = labels[gesture_id];
-                                box=[result_text,percent];
-                                console.log(result_text);
-                                console.log("ok0.90*3");
-                                postMessage(box);
-                                gesture_history.splice(0,gesture_history.length);
-                                cnt=0;
-                            }
-                        }
-                        if (percent > 0.75) {
-                            gesture_history.push(gesture_id);
-                            console.log(gesture_history)
-                            most_gesture_id = getMostCommonGestureId(gesture_history);
-                            if (most_gesture_id.count >= 4) {
-                                const data = await fetch('/model/label.csv').then(response => response.text());
-                                const rows = data.split('\n').map(row => row.trim());
-                                const labels = rows.map(row => row.split(',')[0]);
-                                result_text = labels[gesture_id];
-                                box=[result_text,percent];
-                                console.log(result_text);
-                                console.log("ok0.75*4");
-                                postMessage(box);
-                                // gesture_history = [];
-                                gesture_history.splice(0,gesture_history.length);
-                                cnt=0;
-                            }
-                        }
-                        
-                    }
                     
                 } else {
                     if (percent > 0.99) {
@@ -327,28 +262,36 @@ async function recognition(gestures){
                         const data = await fetch('/model/label.csv').then(response => response.text());
                         const rows = data.split('\n').map(row => row.trim());
                         const labels = rows.map(row => row.split(',')[0]);
+
                         result_text = labels[gesture_id];
+
                         box=[result_text,percent]
+
                         console.log(result_text)
+
                         postMessage(box);
-                        // gesture_history = [];
-                        gesture_history.splice(0,gesture_history.length);
+
+                        gesture_history = [];
+
                         cnt=0;
                         
-                    }if (percent > 0.60) {
+                    } else if (percent > 0.60) {
                         gesture_history.push(gesture_id);
                         console.log(gesture_history)
+
                         most_gesture_id = getMostCommonGestureId(gesture_history);
+
                         if (most_gesture_id.count >= 5) {
                             const data = await fetch('/model/label.csv').then(response => response.text());
                             const rows = data.split('\n').map(row => row.trim());
                             const labels = rows.map(row => row.split(',')[0]);
+
                             result_text = labels[gesture_id];
+                            
                             box=[result_text,percent]
                             console.log(result_text)
                             postMessage(box);
-                            // gesture_history = [];
-                            gesture_history.splice(0,gesture_history.length);
+                            gesture_history = [];
                             cnt=0;
                         }
                     }
@@ -422,5 +365,5 @@ async function recognition(gestures){
         //     }
         // });
         
-    
+    }
 }
