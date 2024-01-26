@@ -156,6 +156,11 @@ function pre_process_hands(hands_history){
 }
 let gesture_history=[];
 let cnt=0;
+
+// let ch_flame = 2.6 / 16 
+// let new_ch_flame = ch_flame
+// let flag = 1
+
 async function recognition(gestures){
     
     let pose_history=gestures[0];
@@ -182,6 +187,7 @@ async function recognition(gestures){
         pre_right=pre_process_hands(right_history);
 
         pre_data=pre_pose.concat(pre_left,pre_right);
+        console.log(pre_data.length)
 
         try {
             const ges = await gesturePredictor.gesture(pre_data, n);
@@ -201,7 +207,7 @@ async function recognition(gestures){
                 } else {
                     if (percent > 0.99) {
 
-                        console.log(gesture_history)
+                        // console.log(gesture_history)
                         const data = await fetch('/model/label.csv').then(response => response.text());
                         const rows = data.split('\n').map(row => row.trim());
                         const labels = rows.map(row => row.split(',')[0]);
@@ -210,7 +216,7 @@ async function recognition(gestures){
 
                         box=[result_text,percent]
 
-                        console.log(result_text)
+                        // console.log(result_text)
 
                         postMessage(box);
 
@@ -220,7 +226,7 @@ async function recognition(gestures){
                         
                     } else if (percent > 0.60) {
                         gesture_history.push(gesture_id);
-                        console.log(gesture_history)
+                        // console.log(gesture_history)
 
                         most_gesture_id = getMostCommonGestureId(gesture_history);
 
@@ -232,7 +238,7 @@ async function recognition(gestures){
                             result_text = labels[gesture_id];
                             
                             box=[result_text,percent]
-                            console.log(result_text)
+                            // console.log(result_text)
                             postMessage(box);
                             gesture_history = [];
                             cnt=0;

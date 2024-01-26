@@ -14,11 +14,11 @@ let shuwa = "none";
 let number=0;
 
 //カメラのサイズ
-// const width= 1280;
-// const height= 720;
+const width= 1280;
+const height= 720;
 
-const width= 1400;
-const height= 900;
+// const width= 1400;
+// const height= 900;
 
 //カーソル用webworker作成からデータを受け取る記述
 handsign_worker.addEventListener('message', function (e) {
@@ -57,82 +57,94 @@ for(let i=0;i<21;i++){
     right_history.push([]);
 }
 
+let start_time = Date.now();
+console.log(start_time);
+let history_length = 16;
+let one_gesture_time = 2.6;
+let ch_flame = (one_gesture_time / history_length) * 1000 ;
+let new_ch_flame = ch_flame;
+
+
 //常に実行され続ける関数的な奴
 function onResults(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0,canvasElement.width, canvasElement.height);
 
+    let time_difference = Date.now() - start_time;
+    console.log(time_difference);
 
-    //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+    //時間処理
+    if ((time_difference) > ch_flame){ 
+        ch_flame = ch_flame + new_ch_flame;
+        console.log("j3",ch_flame)
+        //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+        if(results.poseLandmarks){
+            //検出した33個の特徴点のうち認識に必要な点だけを抽出
+            use_pose_landmarks = results.poseLandmarks.slice(11,17);
 
-    //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
-    if(results.poseLandmarks){
-
-        //検出した33個の特徴点のうち認識に必要な点だけを抽出
-        use_pose_landmarks = results.poseLandmarks.slice(11,17);
-
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        pose_landmarks=clac_landmark_list(width,height,use_pose_landmarks);
-        for(let i=0;i<6;i++){
-            pose_history[i].push(pose_landmarks[i]);
-            //16フレーム分保持。それ以上は削除
-            if(pose_history[i][16]){
-                pose_history[i].shift();
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            pose_landmarks=clac_landmark_list(width,height,use_pose_landmarks);
+            for(let i=0;i<6;i++){
+                pose_history[i].push(pose_landmarks[i]);
+                //16フレーム分保持。それ以上は削除
+                if(pose_history[i][16]){
+                    pose_history[i].shift();
+                }
+            }
+        }else{
+            for(let i=0;i<6;i++){
+                //検出されなかったら[0,0]を挿入
+                pose_history[i].push([0,0]);
+                if(pose_history[i][16]){
+                    pose_history[i].shift();
+                }
             }
         }
-    }else{
-        for(let i=0;i<6;i++){
-            //検出されなかったら[0,0]を挿入
-            pose_history[i].push([0,0]);
-            if(pose_history[i][16]){
-                pose_history[i].shift();
-            }
-        }
-    }
-    //leftHandLandmarks(左手)を検知したら動作
-    if(results.leftHandLandmarks){
-    
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        left_landmarks=clac_landmark_list(width,height,results.leftHandLandmarks);
+        //leftHandLandmarks(左手)を検知したら動作
+        if(results.leftHandLandmarks){
 
-        //検出した左手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成。
-        results.leftHandLandmarks[0]=results.poseLandmarks[15];
-        for(let i=0;i<21;i++){
-            left_history[i].push(left_landmarks[i]);
-            if(left_history[i][16]){
-                left_history[i].shift();
-            }
-        }
-    }else{
-        for(let i=0;i<21;i++){
-            left_history[i].push([0,0]);
-            if(left_history[i][16]){
-                left_history[i].shift();
-            }
-        }
-    }
-    //rightHandLandmarks(右手)を検知したら動作
-    if(results.rightHandLandmarks){
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        right_landmarks=clac_landmark_list(width,height,results.rightHandLandmarks);
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            left_landmarks=clac_landmark_list(width,height,results.leftHandLandmarks);
 
-        //検出した右手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成
-        results.rightHandLandmarks[0]=results.poseLandmarks[16];
-
-        for(let i=0;i<21;i++){
-            right_history[i].push(right_landmarks[i]);
-            //console.log(right_history[i][0])
-            if(right_history[i][16]){
-                right_history[i].shift();
+            //検出した左手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成。
+            results.leftHandLandmarks[0]=results.poseLandmarks[15];
+            for(let i=0;i<21;i++){
+                left_history[i].push(left_landmarks[i]);
+                if(left_history[i][16]){
+                    left_history[i].shift();
+                }
+            }
+        }else{
+            for(let i=0;i<21;i++){
+                left_history[i].push([0,0]);
+                if(left_history[i][16]){
+                    left_history[i].shift();
+                }
             }
         }
-    }else{
-        for(let i=0;i<21;i++){
-            right_history[i].push([0,0]);
-            // console.log(right_history[i][0])
-            if(right_history[i][16]){
-                right_history[i].shift();
+        //rightHandLandmarks(右手)を検知したら動作
+        if(results.rightHandLandmarks){
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            right_landmarks=clac_landmark_list(width,height,results.rightHandLandmarks);
+
+            //検出した右手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成
+            results.rightHandLandmarks[0]=results.poseLandmarks[16];
+
+            for(let i=0;i<21;i++){
+                right_history[i].push(right_landmarks[i]);
+                //console.log(right_history[i][0])
+                if(right_history[i][16]){
+                    right_history[i].shift();
+                }
+            }
+        }else{
+            for(let i=0;i<21;i++){
+                right_history[i].push([0,0]);
+                // console.log(right_history[i][0])
+                if(right_history[i][16]){
+                    right_history[i].shift();
+                }
             }
         }
     }
