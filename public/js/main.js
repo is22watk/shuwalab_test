@@ -57,12 +57,19 @@ for(let i=0;i<21;i++){
     right_history.push([]);
 }
 
+
 let start_time = Date.now();
 console.log(start_time);
 let history_length = 16;
 let one_gesture_time = 2.6;
 let ch_flame = (one_gesture_time / history_length) * 1000 ;
-let new_ch_flame = ch_flame;
+let temp_ch_flame = ch_flame;
+
+
+// let ch_flame = ch_flame_cnt
+
+// let ando = 12
+// console.log(adsf)
 
 
 //常に実行され続ける関数的な奴
@@ -72,12 +79,12 @@ function onResults(results) {
     canvasCtx.drawImage(results.image, 0, 0,canvasElement.width, canvasElement.height);
 
     let time_difference = Date.now() - start_time;
-    console.log(time_difference);
+    // console.log(time_difference);
 
     //時間処理
     if ((time_difference) > ch_flame){ 
         ch_flame = ch_flame + new_ch_flame;
-        console.log("j3",ch_flame)
+        // console.log("j3",ch_flame)
         //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
         if(results.poseLandmarks){
             //検出した33個の特徴点のうち認識に必要な点だけを抽出
