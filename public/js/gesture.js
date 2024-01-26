@@ -185,9 +185,15 @@ let flag_cnt = 1
 // let ch_flame = 2.6 / 16 
 // let new_ch_flame = ch_flame
 // let flag = 1
-
+test = false
 async function recognition(gestures){
-    
+    console.log("test",test)
+    if (test == true){
+        console.log("--------------------------------------")
+        return;
+    }
+    test = true;
+   
     let pose_history=gestures[0];
     let left_history=gestures[1];
     let right_history=gestures[2];
@@ -234,12 +240,15 @@ async function recognition(gestures){
                 console.log("cnt",cnt);
                 // console.log(cnt)
                 if (cnt < 16) {
-                    if (flag_cnt == 1 && cnt == 0){
+                    if (flag_cnt == 1 ){
                         new_start_time = Date.now();
                         console.log("new_start_time",new_start_time);
                         flag_cnt = 0;
-                        new_ch_flame = new_temp_ch_flame
+                        new_ch_flame = new_temp_ch_flame;
+                        
+                        
                     }
+                    
                     // console.log("flag_cnt",flag_cnt)
                     new_time_difference = Date.now() - new_start_time;
                     console.log("new_time_difference",new_time_difference)
@@ -247,7 +256,10 @@ async function recognition(gestures){
                     if ((new_time_difference) > new_ch_flame){ 
                         new_ch_flame = new_ch_flame + new_temp_ch_flame;
                         cnt += 1;
-                        console.log("cnt",cnt)
+                        console.log("cnt",cnt);
+                        
+                        
+                        
                         // console.log(ch_flame);
                     }
                     // cnt += 1;
@@ -272,6 +284,8 @@ async function recognition(gestures){
 
                         cnt=0;
                         flag_cnt = 1;
+                        throw new Error('Some error occurred');
+                        
                         
                     } else if (percent > 0.60) {
                         gesture_history.push(gesture_id);
@@ -292,12 +306,23 @@ async function recognition(gestures){
                             gesture_history = [];
                             cnt=0;
                             flag_cnt = 1;
+                            throw new Error('Some error occurred');
                         }
                     }
                 }
             }
         } catch (error) {
-            console.error('Error in recognition:', error);
+            if (error.message === 'Some error occurred') {
+                console.error('特定のエラーが発生しました');
+                // ここで何らかの対処を行う
+            } else {
+                console.error('Error in recognition:', error);
+                // 別のエラーに対する対処を行う
+            }
+            
+            
+        } finally{
+            test = false;
         }
 
         // gesture(pre_data).then(ges=>{

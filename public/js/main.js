@@ -83,7 +83,7 @@ function onResults(results) {
 
     //時間処理
     if ((time_difference) > ch_flame){ 
-        ch_flame = ch_flame + new_ch_flame;
+        ch_flame = ch_flame + temp_ch_flame;
         // console.log("j3",ch_flame)
         //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
         if(results.poseLandmarks){
