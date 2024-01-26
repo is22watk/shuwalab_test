@@ -263,11 +263,14 @@ async function recognition(gestures){
 
                 let result_text;
                 let box;
+                
+                console.log(percent, gesture_id)
                 console.log(cnt)
-                // if (cnt < 16) {
-                if (cnt < 32) {
+                
+                
+                if (cnt < 48) {
                     cnt += 1;
-                    if(cnt > 16){
+                    if(cnt > 32){
                         if (percent > 0.999) {
                             console.log(gesture_history)
                             const data = await fetch('/model/label.csv').then(response => response.text());
@@ -353,6 +356,8 @@ async function recognition(gestures){
                         }
                     }
                 }
+                
+
             }
         } catch (error) {
             console.error('Error in recognition:', error);

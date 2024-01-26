@@ -48,7 +48,9 @@ let left_landmarks=[];
 let right_landmarks=[];
 
 let use_pose_landmarks;
-
+let pose=[];
+let left=[];
+let right=[];
 for(let i=0;i<6;i++){
     pose_history.push([]);
 }
@@ -71,6 +73,11 @@ function onResults(results) {
 
         //検出した33個の特徴点のうち認識に必要な点だけを抽出
         use_pose_landmarks = results.poseLandmarks.slice(11,17);
+        for(let i=0;i<6;i++){
+            // x座標を反転
+            let flippedX = 1 - use_pose_landmarks[i].x;
+            pose[i] = [flippedX,use_pose_landmarks[i].y];
+        }
 
         //clac_landmark_listでデータの計算(gesture.jsの関数)
         pose_landmarks=clac_landmark_list(width,height,use_pose_landmarks);
@@ -92,6 +99,11 @@ function onResults(results) {
     }
     //leftHandLandmarks(左手)を検知したら動作
     if(results.leftHandLandmarks){
+        for(let i=0;i<21;i++){
+            // x座標を反転
+            let flippedX = 1 - results.leftHandLandmarks[i].x;
+            left[i] = [flippedX,results.leftHandLandmarks[i].y];
+        }
     
         //clac_landmark_listでデータの計算(gesture.jsの関数)
         left_landmarks=clac_landmark_list(width,height,results.leftHandLandmarks);
@@ -114,6 +126,11 @@ function onResults(results) {
     }
     //rightHandLandmarks(右手)を検知したら動作
     if(results.rightHandLandmarks){
+        for(let i=0;i<21;i++){
+            // x座標を反転
+            let flippedX = 1 - results.rightHandLandmarks[i].x;
+            right[i] = [flippedX,results.rightHandLandmarks[i].y];
+        }
         //clac_landmark_listでデータの計算(gesture.jsの関数)
         right_landmarks=clac_landmark_list(width,height,results.rightHandLandmarks);
 
@@ -157,6 +174,9 @@ function onResults(results) {
 
     //描画状態の復元
     canvasCtx.restore();
+    if(handsign==1){
+        ex_flg=1
+    }
     
 
     //カメラに右手か左手が検出されたら動作
@@ -189,7 +209,7 @@ function onResults(results) {
                 gesture_worker.postMessage(message_data);
                 //カーソルを画面上に表示したいようにするための記述
  
-                console.log(shuwa)
+                // console.log(shuwa)
                 //認識が終わったら実行
                 if(shuwa != "none"){
                     if(sc_flg == 0){
