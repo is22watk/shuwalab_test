@@ -54,94 +54,94 @@ function getMostCommonGestureId(history) {
     let counts = {};
     let max_count = 0;
     let most_commonId;
-  
+
     for (const id of history) {
         counts[id] = (counts[id] || 0) + 1;
-  
+
         if (counts[id] > max_count) {
             max_count = counts[id];
             most_commonId = id;
         }
     }
-  
+
     return { id: most_commonId, count: max_count };
 }
 //calc=計算
 //座標の返還などはここ
 
-function clac_landmark_list(width,height,landmarks){
+function clac_landmark_list(width, height, landmarks) {
     let landmark_point = [];
     let landmark_x;
     let landmark_y;
-    landmarks.forEach(function(landmark,_){
+    landmarks.forEach(function (landmark, _) {
         landmark_x = Math.min(Math.floor(landmark.x * width), width - 1);
         landmark_y = Math.min(Math.floor(landmark.y * height), height - 1);
         landmark_point.push([landmark_x, landmark_y]);
-        
+
     });
 
     return landmark_point;
 }
 
-function pre_process_pose(pose_history){
+function pre_process_pose(pose_history) {
 
-    let temp_pose_list =  JSON.parse(JSON.stringify(pose_history));
+    let temp_pose_list = JSON.parse(JSON.stringify(pose_history));
     var center_point;
     let div_value;
     let pre_pose;
-    for(flame=0;flame<16;flame++){
+    for (flame = 0; flame < 16; flame++) {
 
-        center_point=[
-            (temp_pose_list[0][flame][0] + temp_pose_list[1][flame][0])/2,
-            (temp_pose_list[0][flame][1] + temp_pose_list[1][flame][1])/2
+        center_point = [
+            (temp_pose_list[0][flame][0] + temp_pose_list[1][flame][0]) / 2,
+            (temp_pose_list[0][flame][1] + temp_pose_list[1][flame][1]) / 2
         ]
 
-        div_value=((temp_pose_list[0][flame][0] - center_point[0]) + (center_point[0] - temp_pose_list[1][flame][0])) / 2
-        
-        if (div_value < 0){
+        div_value = ((temp_pose_list[0][flame][0] - center_point[0]) + (center_point[0] - temp_pose_list[1][flame][0])) / 2
+
+        if (div_value < 0) {
             div_value *= -1
         }
 
-        for(point=0;point<temp_pose_list.length;point++){
+        for (point = 0; point < temp_pose_list.length; point++) {
             temp_pose_list[point][flame][0] = (temp_pose_list[point][flame][0] - center_point[0]) / div_value
             temp_pose_list[point][flame][1] = (temp_pose_list[point][flame][1] - center_point[1]) / div_value
         }
     }
-    
-    for(point=0;point<temp_pose_list.length;point++){
-        temp_pose_list[point]=temp_pose_list[point].flat();
+
+    for (point = 0; point < temp_pose_list.length; point++) {
+        temp_pose_list[point] = temp_pose_list[point].flat();
     }
-    pre_pose=temp_pose_list.flat();
+    pre_pose = temp_pose_list.flat();
     return pre_pose;
 }
 
-function pre_process_hands(hands_history){
+function pre_process_hands(hands_history) {
 
-    let temp_hands_list =  JSON.parse(JSON.stringify(hands_history.slice(1,21)));
+    let temp_hands_list = JSON.parse(JSON.stringify(hands_history.slice(1, 21)));
     let hand_history = hands_history
     let max_value;
-    for(num=0;num<temp_hands_list.length;num++){
-        for(flame=0;flame<16;flame++){
+    for (num = 0; num < temp_hands_list.length; num++) {
+        for (flame = 0; flame < 16; flame++) {
             temp_hands_list[num][flame][0] = temp_hands_list[num][flame][0] - hand_history[0][flame][0]
             temp_hands_list[num][flame][1] = temp_hands_list[num][flame][1] - hand_history[0][flame][1]
         }
-        temp_hands_list[num]=temp_hands_list[num].flat();
+        temp_hands_list[num] = temp_hands_list[num].flat();
     }
-    temp_hands_list=temp_hands_list.flat();
+    temp_hands_list = temp_hands_list.flat();
 
-    try{
-        max_value=Math.max(...temp_hands_list.map(Math.abs))
+    try {
+        max_value = Math.max(...temp_hands_list.map(Math.abs))
     }
-    catch(error){
-        max_value=0;
+    catch (error) {
+        max_value = 0;
 
     }
 
-    
+
     function normalize_(n, max_value) {
         try {
-            let box=n/max_value;
-            if(isNaN(box)){
+            let box = n / max_value;
+            if (isNaN(box)) {
                 return 0;
             }
             return box;
@@ -149,20 +149,20 @@ function pre_process_hands(hands_history){
         } catch (error) {
             return 0;
         }
-      }
-      temp_hands_list = temp_hands_list.map(value => normalize_(value, max_value));
-      return temp_hands_list;
-    
+    }
+    temp_hands_list = temp_hands_list.map(value => normalize_(value, max_value));
+    return temp_hands_list;
+
 }
 
-let gesture_history=[];
-let cnt=0;
+let gesture_history = [];
+let cnt = 0;
 
 
 
 let new_history_length = 16;
 let new_one_gesture_time = 2.6;
-let new_ch_flame = (new_one_gesture_time / new_history_length) * 1000 ;
+let new_ch_flame = (new_one_gesture_time / new_history_length) * 1000;
 let new_temp_ch_flame = new_ch_flame;
 let flag_cnt = 1
 // let start_time, ch_flame, temp_ch_flame;
@@ -186,25 +186,20 @@ let flag_cnt = 1
 // let new_ch_flame = ch_flame
 // let flag = 1
 test = false
-async function recognition(gestures){
-    console.log("test",test)
-    if (test == true){
-        console.log("--------------------------------------")
-        return;
-    }
-    test = true;
-   
-    let pose_history=gestures[0];
-    let left_history=gestures[1];
-    let right_history=gestures[2];
-    // let n=gesturse[3];
-    let n=2;
-    
-    let pre_pose=[];
-    let pre_left=[];
-    let pre_right=[];
+async function recognition(gestures) {
 
-    let pre_data=[];
+
+    let pose_history = gestures[0];
+    let left_history = gestures[1];
+    let right_history = gestures[2];
+    // let n=gesturse[3];
+    let n = 2;
+
+    let pre_pose = [];
+    let pre_left = [];
+    let pre_right = [];
+
+    let pre_data = [];
 
     let gesture_id;
     let gesture_result;
@@ -212,14 +207,14 @@ async function recognition(gestures){
     let percent;
     let most_gesture_id;
     // console.log("flag_cnt",flag_cnt)
-    
-    //console.log(pose_history[0])
-    if (pose_history[0].length==16){
-        pre_pose=pre_process_pose(pose_history);
-        pre_left=pre_process_hands(left_history);
-        pre_right=pre_process_hands(right_history);
 
-        pre_data=pre_pose.concat(pre_left,pre_right);
+    //console.log(pose_history[0])
+    if (pose_history[0].length == 16) {
+        pre_pose = pre_process_pose(pose_history);
+        pre_left = pre_process_hands(left_history);
+        pre_right = pre_process_hands(right_history);
+
+        pre_data = pre_pose.concat(pre_left, pre_right);
         // console.log(pre_data.length)
         console.log("yes")
 
@@ -235,35 +230,35 @@ async function recognition(gestures){
                 let result_text;
                 let box;
 
-                
-                console.log("flag_cnt",flag_cnt);
-                console.log("cnt",cnt);
+
+                console.log("flag_cnt", flag_cnt);
+                console.log("cnt", cnt);
                 // console.log(cnt)
                 if (cnt < 16) {
-                    if (flag_cnt == 1 ){
+                    if (flag_cnt == 1) {
                         new_start_time = Date.now();
-                        console.log("new_start_time",new_start_time);
+                        console.log("new_start_time", new_start_time);
                         flag_cnt = 0;
                         new_ch_flame = new_temp_ch_flame;
-                        
-                        
+
+
                     }
-                    
+
                     // console.log("flag_cnt",flag_cnt)
                     new_time_difference = Date.now() - new_start_time;
-                    console.log("new_time_difference",new_time_difference)
-                    console.log("new_ch_flame",new_ch_flame)
-                    if ((new_time_difference) > new_ch_flame){ 
+                    console.log("new_time_difference", new_time_difference)
+                    console.log("new_ch_flame", new_ch_flame)
+                    if ((new_time_difference) > new_ch_flame) {
                         new_ch_flame = new_ch_flame + new_temp_ch_flame;
                         cnt += 1;
-                        console.log("cnt",cnt);
-                        
-                        
-                        
+                        console.log("cnt", cnt);
+
+
+
                         // console.log(ch_flame);
                     }
                     // cnt += 1;
-                    
+
                 } else {
                     if (percent > 0.99) {
 
@@ -274,7 +269,7 @@ async function recognition(gestures){
 
                         result_text = labels[gesture_id];
 
-                        box=[result_text,percent]
+                        box = [result_text, percent]
 
                         // console.log(result_text)
 
@@ -282,11 +277,11 @@ async function recognition(gestures){
 
                         gesture_history = [];
 
-                        cnt=0;
+                        cnt = 0;
                         flag_cnt = 1;
                         throw new Error('Some error occurred');
-                        
-                        
+
+
                     } else if (percent > 0.60) {
                         gesture_history.push(gesture_id);
                         // console.log(gesture_history)
@@ -299,12 +294,12 @@ async function recognition(gestures){
                             const labels = rows.map(row => row.split(',')[0]);
 
                             result_text = labels[gesture_id];
-                            
-                            box=[result_text,percent]
+
+                            box = [result_text, percent]
                             // console.log(result_text)
                             postMessage(box);
                             gesture_history = [];
-                            cnt=0;
+                            cnt = 0;
                             flag_cnt = 1;
                             throw new Error('Some error occurred');
                         }
@@ -319,9 +314,9 @@ async function recognition(gestures){
                 console.error('Error in recognition:', error);
                 // 別のエラーに対する対処を行う
             }
-            
-            
-        } finally{
+
+
+        } finally {
             test = false;
         }
 
@@ -331,9 +326,9 @@ async function recognition(gestures){
 
 
         //     if(Number.isInteger(gesture_id)){
-            
+
         //         percent = gesture_result;
-                
+
         //         let result_text;
         //         if (flame < 16) {
         //             flame += 1;
@@ -346,16 +341,16 @@ async function recognition(gestures){
         //                         // CSV データの処理
         //                         const rows = data.split('\n').map(row => row.trim());
         //                         const labels = rows.map(row => row.split(',')[0]);
-    
+
         //                         result_text = labels[gesture_id];
         //                         gesture_history=[]
 
         //                         return result_text;
-    
+
         //                     })
         //                     .catch(error => console.error('Error reading the file:', error));
         //                     pre_data=[];
-    
+
         //                     return result_text;
         //             } else if (percent > 0.60) {
         //                 gesture_history.push(gesture_id);
@@ -371,7 +366,7 @@ async function recognition(gestures){
         //                         // CSV データの処理
         //                         const rows = data.split('\n').map(row => row.trim());
         //                         const labels = rows.map(row => row.split(',')[0]);
-    
+
         //                         result_text = labels[gesture_id];
         //                         gesture_history=[]
 
@@ -381,13 +376,13 @@ async function recognition(gestures){
         //                     pre_data=[];
 
         //                 }
-    
+
         //             }
         //         }
-    
-    
+
+
         //     }
         // });
-        
+
     }
 }

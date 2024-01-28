@@ -11,11 +11,11 @@ const gesture_worker = new Worker('/js/gesture_webworker.js');
 let shuwa = "none";
 
 //手話用webworkerに引き渡すカテゴリーを示す変数
-let number=0;
+let number = 0;
 
 //カメラのサイズ
-const width= 1280;
-const height= 720;
+const width = 1280;
+const height = 720;
 
 // const width= 1400;
 // const height= 900;
@@ -39,31 +39,33 @@ let canvasElement = document.getElementsByClassName('output_canvas')[0];
 let canvasCtx = canvasElement.getContext('2d');
 
 //gesture.jsに渡すようデータの加工に必要な変数の宣言
-const pose_history=[];
+const pose_history = [];
 const left_history = [];
 const right_history = [];
 
-let pose_landmarks=[];
-let left_landmarks=[];
-let right_landmarks=[];
+let pose_landmarks = [];
+let left_landmarks = [];
+let right_landmarks = [];
 
 let use_pose_landmarks;
 
-for(let i=0;i<6;i++){
+for (let i = 0; i < 6; i++) {
     pose_history.push([]);
 }
-for(let i=0;i<21;i++){
+for (let i = 0; i < 21; i++) {
     left_history.push([]);
     right_history.push([]);
 }
 
 
-let start_time = Date.now();
-console.log(start_time);
+let start_time = 0;
+// console.log(start_time);
 let history_length = 16;
 let one_gesture_time = 2.6;
-let ch_flame = (one_gesture_time / history_length) * 1000 ;
+let ch_flame = (one_gesture_time / history_length) * 1000;
 let temp_ch_flame = ch_flame;
+let time_difference = (one_gesture_time * 1000)
+let flag = 1
 
 
 // let ch_flame = ch_flame_cnt
@@ -76,80 +78,94 @@ let temp_ch_flame = ch_flame;
 function onResults(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(results.image, 0, 0,canvasElement.width, canvasElement.height);
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-    let time_difference = Date.now() - start_time;
-    // console.log(time_difference);
+    if (flag == 1) {
+        start_time = Date.now() - (time_difference - (one_gesture_time * 1000));
+        console.log("st", start_time)
+        flag = 0;
+    }
+
+    time_difference = Date.now() - start_time;
+    console.log("time_difference", time_difference);
+
+
 
     //時間処理
-    if ((time_difference) > ch_flame){ 
+    if ((time_difference) > ch_flame) {
+        console.log("ch_flame ", ch_flame);
         ch_flame = ch_flame + temp_ch_flame;
-        // console.log("j3",ch_flame)
+
+        if (time_difference > (one_gesture_time * 1000)) {
+            ch_flame = temp_ch_flame
+            flag = 1;
+        }
+
         //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
-        if(results.poseLandmarks){
+        if (results.poseLandmarks) {
             //検出した33個の特徴点のうち認識に必要な点だけを抽出
-            use_pose_landmarks = results.poseLandmarks.slice(11,17);
+            use_pose_landmarks = results.poseLandmarks.slice(11, 17);
 
             //clac_landmark_listでデータの計算(gesture.jsの関数)
-            pose_landmarks=clac_landmark_list(width,height,use_pose_landmarks);
-            for(let i=0;i<6;i++){
+            pose_landmarks = clac_landmark_list(width, height, use_pose_landmarks);
+            for (let i = 0; i < 6; i++) {
                 pose_history[i].push(pose_landmarks[i]);
                 //16フレーム分保持。それ以上は削除
-                if(pose_history[i][16]){
+                if (pose_history[i][16]) {
                     pose_history[i].shift();
                 }
             }
-        }else{
-            for(let i=0;i<6;i++){
+        } else {
+            for (let i = 0; i < 6; i++) {
                 //検出されなかったら[0,0]を挿入
-                pose_history[i].push([0,0]);
-                if(pose_history[i][16]){
+                pose_history[i].push([0, 0]);
+                if (pose_history[i][16]) {
                     pose_history[i].shift();
                 }
             }
         }
         //leftHandLandmarks(左手)を検知したら動作
-        if(results.leftHandLandmarks){
+        if (results.leftHandLandmarks) {
 
             //clac_landmark_listでデータの計算(gesture.jsの関数)
-            left_landmarks=clac_landmark_list(width,height,results.leftHandLandmarks);
+            left_landmarks = clac_landmark_list(width, height, results.leftHandLandmarks);
 
             //検出した左手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成。
-            results.leftHandLandmarks[0]=results.poseLandmarks[15];
-            for(let i=0;i<21;i++){
+            results.leftHandLandmarks[0] = results.poseLandmarks[15];
+            for (let i = 0; i < 21; i++) {
                 left_history[i].push(left_landmarks[i]);
-                if(left_history[i][16]){
+                if (left_history[i][16]) {
                     left_history[i].shift();
                 }
             }
-        }else{
-            for(let i=0;i<21;i++){
-                left_history[i].push([0,0]);
-                if(left_history[i][16]){
+        } else {
+            for (let i = 0; i < 21; i++) {
+                left_history[i].push([0, 0]);
+                if (left_history[i][16]) {
                     left_history[i].shift();
                 }
             }
         }
         //rightHandLandmarks(右手)を検知したら動作
-        if(results.rightHandLandmarks){
+        if (results.rightHandLandmarks) {
             //clac_landmark_listでデータの計算(gesture.jsの関数)
-            right_landmarks=clac_landmark_list(width,height,results.rightHandLandmarks);
+            right_landmarks = clac_landmark_list(width, height, results.rightHandLandmarks);
 
             //検出した右手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成
-            results.rightHandLandmarks[0]=results.poseLandmarks[16];
+            results.rightHandLandmarks[0] = results.poseLandmarks[16];
 
-            for(let i=0;i<21;i++){
+            for (let i = 0; i < 21; i++) {
                 right_history[i].push(right_landmarks[i]);
                 //console.log(right_history[i][0])
-                if(right_history[i][16]){
+                if (right_history[i][16]) {
                     right_history[i].shift();
                 }
             }
-        }else{
-            for(let i=0;i<21;i++){
-                right_history[i].push([0,0]);
+        } else {
+            for (let i = 0; i < 21; i++) {
+                right_history[i].push([0, 0]);
                 // console.log(right_history[i][0])
-                if(right_history[i][16]){
+                if (right_history[i][16]) {
                     right_history[i].shift();
                 }
             }
@@ -157,67 +173,67 @@ function onResults(results) {
     }
     //特徴点と点をつなぐ線の表示(pose)
     drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
-                    {color: '#fff', lineWidth: 4});
+        { color: '#fff', lineWidth: 4 });
     //特徴点の表示(pose)             
     drawLandmarks(canvasCtx, use_pose_landmarks,
-                    {color: '#fff', lineWidth: 2});
+        { color: '#fff', lineWidth: 2 });
     //特徴点と点をつなぐ線の表示(right)
     drawConnectors(canvasCtx, results.leftHandLandmarks, HAND_CONNECTIONS,
-                    {color: '#fff', lineWidth: 5});
+        { color: '#fff', lineWidth: 5 });
     //特徴点の表示(right)  
     drawLandmarks(canvasCtx, results.leftHandLandmarks,
-                    {color: '#fff', lineWidth: 2});
+        { color: '#fff', lineWidth: 2 });
     //特徴点と点をつなぐ線の表示(left)
     drawConnectors(canvasCtx, results.rightHandLandmarks, HAND_CONNECTIONS,
-                    {color: '#fff', lineWidth: 5});
+        { color: '#fff', lineWidth: 5 });
     //特徴点の表示(left)  
     drawLandmarks(canvasCtx, results.rightHandLandmarks,
-                    {color: '#fff', lineWidth: 2});
+        { color: '#fff', lineWidth: 2 });
 
     //描画状態の復元
     canvasCtx.restore();
-    
+
 
     //カメラに右手か左手が検出されたら動作
     if (results.leftHandLandmarks || results.rightHandLandmarks) {
 
-    //取得したデータの処理
+        //取得したデータの処理
         try {
             //検出された手が左手なら動作
             if (results.leftHandLandmarks) {
 
                 //cleanData.js
-                data = cleanData(results.leftHandLandmarks,"Left");
+                data = cleanData(results.leftHandLandmarks, "Left");
 
             }
             //検出された手が左手なら動作
             else {
-                
+
                 //cleanData.js
-                data = cleanData(results.rightHandLandmarks,"Right");
+                data = cleanData(results.rightHandLandmarks, "Right");
 
             }
 
             //手話用webworkerに送信するためのデータ加工
-            message_data=[pose_history,left_history,right_history,cate_num]
+            message_data = [pose_history, left_history, right_history, cate_num]
 
             //count_flg==1なら(カメラが表示されたら)動作
-            if(count_flg==1){handsign="none";}
-            if(camera_flg == 1){
+            if (count_flg == 1) { handsign = "none"; }
+            if (camera_flg == 1) {
 
                 gesture_worker.postMessage(message_data);
                 //カーソルを画面上に表示したいようにするための記述
- 
+
                 console.log(shuwa)
                 //認識が終わったら実行
-                if(shuwa != "none"){
-                    if(sc_flg == 0){
+                if (shuwa != "none") {
+                    if (sc_flg == 0) {
                         console.log(shuwa)
                         change_result(shuwa);
                         camera_flg = 0;
-                
+
                     }
-                    else if(sc_flg == 1){
+                    else if (sc_flg == 1) {
                         console.log(shuwa)
                         change_config(shuwa);
                         camera_flg = 0;
@@ -225,10 +241,10 @@ function onResults(results) {
                 }
             }
             //count_flg==0なら(カメラ以外が表示されたら)動作
-            else{
+            else {
 
                 //変数shuwaを初期値に変更
-                shuwa="none";
+                shuwa = "none";
 
                 //カーソル用webworkerにデータを送信
                 handsign_worker.postMessage(data);
@@ -238,14 +254,14 @@ function onResults(results) {
         catch (error) { //エラーが発生したらlog出力
             // console.log(error.message);
         }
-        
+
         try {
             //ハンドサインが「open」だった場合、カーソル移動処理。下のコードと合わせられるかも。
             if (results.leftHandLandmarks[0] && handsign == "0") {
                 //手の中心座標をcursorXYに渡す。
-                cursorXY(results.leftHandLandmarks[0,9]);  
+                cursorXY(results.leftHandLandmarks[0, 9]);
             }
-            
+
         }
         catch (error) {
             //console.log("left error.message");
@@ -253,10 +269,10 @@ function onResults(results) {
         try {
             //ハンドサインが「open」だった場合、カーソル移動処理。
             if (results.rightHandLandmarks[0] && handsign == "0") {
-                cursorXY(results.rightHandLandmarks[0,9]);  
-                
+                cursorXY(results.rightHandLandmarks[0, 9]);
+
             }
-            
+
         }
         catch (error) {
             //console.log("left error.message");
@@ -281,9 +297,11 @@ function onResults(results) {
 };
 
 //holisticのファイル読み込み
-const holistic = new Holistic({locateFile: (file) => {
-    return `./node_modules/@mediapipe/holistic/${file}`
-}});
+const holistic = new Holistic({
+    locateFile: (file) => {
+        return `./node_modules/@mediapipe/holistic/${file}`
+    }
+});
 //holisticの設定読み込み
 holistic.setOptions({
     modelComplexity: 1,
@@ -299,7 +317,7 @@ holistic.onResults(onResults);
 //カメラからの映像をholistic.jsで使えるようにする
 const camera = new Camera(videoElement, {
     onFrame: async () => {
-    await holistic.send({image: videoElement});
+        await holistic.send({ image: videoElement });
     },
     //カメラの解像度の設定
     width: width,
