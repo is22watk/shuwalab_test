@@ -58,10 +58,11 @@ for (let i = 0; i < 21; i++) {
 }
 
 
-let start_time = 0;
-// console.log(start_time);
+// 手話の特長点取得フレーム・時間設定
 let history_length = 16;
 let one_gesture_time = 2.6;
+// 時間設定に必要な変数を宣言
+let start_time = 0;
 let ch_flame = (one_gesture_time / history_length) * 1000;
 let temp_ch_flame = ch_flame;
 let time_difference = (one_gesture_time * 1000)
@@ -81,19 +82,19 @@ function onResults(results) {
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
     if (flag == 1) {
+        temp = start_time;
         start_time = Date.now() - (time_difference - (one_gesture_time * 1000));
-        console.log("st", start_time)
         flag = 0;
     }
 
     time_difference = Date.now() - start_time;
-    console.log("time_difference", time_difference);
+    // console.log("time_difference", time_difference);
 
 
 
     //時間処理
     if ((time_difference) > ch_flame) {
-        console.log("ch_flame ", ch_flame);
+        // console.log("ch_flame ", ch_flame);
         ch_flame = ch_flame + temp_ch_flame;
 
         if (time_difference > (one_gesture_time * 1000)) {

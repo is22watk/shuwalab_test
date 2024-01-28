@@ -162,32 +162,20 @@ let cnt = 0;
 
 let new_history_length = 16;
 let new_one_gesture_time = 2.6;
+
+let new_start_time = 0;
 let new_ch_flame = (new_one_gesture_time / new_history_length) * 1000;
 let new_temp_ch_flame = new_ch_flame;
-let flag_cnt = 1
-// let start_time, ch_flame, temp_ch_flame;
-// [start_time, ch_flame, temp_ch_flame] = time_set();
-// console.log(start_time);
-
-// let start_time = Date.now();
-// console.log(start_time);
-// let history_length = 16;
-// let one_gesture_time = 2.6;
-// let ch_flame_cnt = (one_gesture_time / history_length) * 1000 ;
-// let new_ch_flame = ch_flame_cnt;
-// cnt = 0;
+let new_time_difference = 0;
+let flag_cnt = 0
 
 
-
-
-// let ch_flame_cnt = ch_flame
-
-// let ch_flame = 2.6 / 16 
-// let new_ch_flame = ch_flame
-// let flag = 1
 test = false
 async function recognition(gestures) {
 
+    if (new_start_time == 0) {
+        new_start_time = Date.now();
+    }
 
     let pose_history = gestures[0];
     let left_history = gestures[1];
@@ -216,7 +204,6 @@ async function recognition(gestures) {
 
         pre_data = pre_pose.concat(pre_left, pre_right);
         // console.log(pre_data.length)
-        console.log("yes")
 
         try {
             const ges = await gesturePredictor.gesture(pre_data, n);
@@ -231,35 +218,45 @@ async function recognition(gestures) {
                 let box;
 
 
-                console.log("flag_cnt", flag_cnt);
-                console.log("cnt", cnt);
                 // console.log(cnt)
                 if (cnt < 16) {
+                    new_time_difference = Date.now() - new_start_time;
+
                     if (flag_cnt == 1) {
                         new_start_time = Date.now();
                         console.log("new_start_time", new_start_time);
                         flag_cnt = 0;
-                        new_ch_flame = new_temp_ch_flame;
+                        cnt = 0;
 
 
                     }
 
                     // console.log("flag_cnt",flag_cnt)
-                    new_time_difference = Date.now() - new_start_time;
+
                     console.log("new_time_difference", new_time_difference)
                     console.log("new_ch_flame", new_ch_flame)
+
                     if ((new_time_difference) > new_ch_flame) {
                         new_ch_flame = new_ch_flame + new_temp_ch_flame;
                         cnt += 1;
+
                         console.log("cnt", cnt);
-
-
-
-                        // console.log(ch_flame);
                     }
+
+                    if (new_time_difference > (new_one_gesture_time * 1000)) {
+                        new_ch_flame = new_temp_ch_flame
+                        flag_cnt = 1;
+
+                    }
+
+                    console.log("www")
+
+
+
                     // cnt += 1;
 
-                } else {
+                } if (cnt == 16) {
+                    console.log(Date.now() - new_start_time)
                     if (percent > 0.99) {
 
                         // console.log(gesture_history)
@@ -276,9 +273,10 @@ async function recognition(gestures) {
                         postMessage(box);
 
                         gesture_history = [];
-
                         cnt = 0;
-                        flag_cnt = 1;
+
+
+
                         throw new Error('Some error occurred');
 
 
@@ -300,25 +298,17 @@ async function recognition(gestures) {
                             postMessage(box);
                             gesture_history = [];
                             cnt = 0;
-                            flag_cnt = 1;
-                            throw new Error('Some error occurred');
+
+
+
                         }
                     }
                 }
             }
         } catch (error) {
-            if (error.message === 'Some error occurred') {
-                console.error('特定のエラーが発生しました');
-                // ここで何らかの対処を行う
-            } else {
-                console.error('Error in recognition:', error);
-                // 別のエラーに対する対処を行う
-            }
-
-
-        } finally {
-            test = false;
+            console.error('Error in recognition:', error);
         }
+
 
         // gesture(pre_data).then(ges=>{
         //     gesture_id=ges.gestureid;
