@@ -14,11 +14,11 @@ let shuwa = "none";
 let number = 0;
 
 //カメラのサイズ
-const width = 1280;
-const height = 720;
+// const width= 1280;
+// const height= 720;
 
-// const width= 1400;
-// const height= 900;
+const width = 1400;
+const height = 900;
 
 //カーソル用webworker作成からデータを受け取る記述
 handsign_worker.addEventListener('message', function (e) {
@@ -48,7 +48,9 @@ let left_landmarks = [];
 let right_landmarks = [];
 
 let use_pose_landmarks;
-
+let pose = [];
+let left = [];
+let right = [];
 for (let i = 0; i < 6; i++) {
     pose_history.push([]);
 }
@@ -57,38 +59,46 @@ for (let i = 0; i < 21; i++) {
     right_history.push([]);
 }
 
-
-let start_time = Date.now();
-console.log(start_time);
-let history_length = 16;
-let one_gesture_time = 2.6;
-let ch_flame = (one_gesture_time / history_length) * 1000;
-let temp_ch_flame = ch_flame;
-
-
-// let ch_flame = ch_flame_cnt
-
-// let ando = 12
-// console.log(adsf)
-
-
 //常に実行され続ける関数的な奴
 function onResults(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-    let time_difference = Date.now() - start_time;
-    // console.log(time_difference);
+
+    if (flag == 1) {
+        temp = start_time;
+        start_time = Date.now() - (time_difference - (one_gesture_time * 1000));
+        flag = 0;
+    }
+
+    time_difference = Date.now() - start_time;
+    // console.log("time_difference", time_difference);
+
+
 
     //時間処理
     if ((time_difference) > ch_flame) {
+        // console.log("ch_flame ", ch_flame);
         ch_flame = ch_flame + temp_ch_flame;
-        // console.log("j3",ch_flame)
+
+        if (time_difference > (one_gesture_time * 1000)) {
+            ch_flame = temp_ch_flame
+            flag = 1;
+        }
+
+        //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+
         //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
         if (results.poseLandmarks) {
+
             //検出した33個の特徴点のうち認識に必要な点だけを抽出
             use_pose_landmarks = results.poseLandmarks.slice(11, 17);
+            for (let i = 0; i < 6; i++) {
+                // x座標を反転
+                let flippedX = 1 - use_pose_landmarks[i].x;
+                pose[i] = [flippedX, use_pose_landmarks[i].y];
+            }
 
             //clac_landmark_listでデータの計算(gesture.jsの関数)
             pose_landmarks = clac_landmark_list(width, height, use_pose_landmarks);
@@ -110,6 +120,11 @@ function onResults(results) {
         }
         //leftHandLandmarks(左手)を検知したら動作
         if (results.leftHandLandmarks) {
+            for (let i = 0; i < 21; i++) {
+                // x座標を反転
+                let flippedX = 1 - results.leftHandLandmarks[i].x;
+                left[i] = [flippedX, results.leftHandLandmarks[i].y];
+            }
 
             //clac_landmark_listでデータの計算(gesture.jsの関数)
             left_landmarks = clac_landmark_list(width, height, results.leftHandLandmarks);
@@ -132,6 +147,11 @@ function onResults(results) {
         }
         //rightHandLandmarks(右手)を検知したら動作
         if (results.rightHandLandmarks) {
+            for (let i = 0; i < 21; i++) {
+                // x座標を反転
+                let flippedX = 1 - results.rightHandLandmarks[i].x;
+                right[i] = [flippedX, results.rightHandLandmarks[i].y];
+            }
             //clac_landmark_listでデータの計算(gesture.jsの関数)
             right_landmarks = clac_landmark_list(width, height, results.rightHandLandmarks);
 
@@ -176,6 +196,9 @@ function onResults(results) {
 
     //描画状態の復元
     canvasCtx.restore();
+    if (handsign == 1) {
+        ex_flg = 1
+    }
 
 
     //カメラに右手か左手が検出されたら動作
@@ -208,7 +231,7 @@ function onResults(results) {
                 gesture_worker.postMessage(message_data);
                 //カーソルを画面上に表示したいようにするための記述
 
-                console.log(shuwa)
+                // console.log(shuwa)
                 //認識が終わったら実行
                 if (shuwa != "none") {
                     if (sc_flg == 0) {
