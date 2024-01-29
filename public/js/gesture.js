@@ -160,7 +160,7 @@ let cnt = 0;
 
 
 
-let new_history_length = 16;
+
 let new_one_gesture_time = 2.6;
 
 let new_start_time = 0;
@@ -170,7 +170,7 @@ let new_time_difference = 0;
 let flag_cnt = 0
 
 
-test = false
+
 async function recognition(gestures) {
 
     if (new_start_time == 0) {
