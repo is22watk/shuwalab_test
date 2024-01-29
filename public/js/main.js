@@ -14,11 +14,11 @@ let shuwa = "none";
 let number = 0;
 
 //カメラのサイズ
-// const width= 1280;
-// const height= 720;
+const width= 1280;
+const height= 720;
 
-const width = 1400;
-const height = 900;
+// const width = 1400;
+// const height = 900;
 
 //カーソル用webworker作成からデータを受け取る記述
 handsign_worker.addEventListener('message', function (e) {
@@ -59,6 +59,15 @@ for (let i = 0; i < 21; i++) {
     right_history.push([]);
 }
 
+// 手話の特長点取得フレーム・時間設定
+let one_gesture_time = 2.6;
+// 時間設定に必要な変数を宣言
+let start_time = 0;
+let ch_flame = (one_gesture_time / 16) * 1000;
+let temp_ch_flame = ch_flame;
+let time_difference = (one_gesture_time * 1000)
+let flag = 1
+
 //常に実行され続ける関数的な奴
 function onResults(results) {
     canvasCtx.save();
@@ -80,7 +89,7 @@ function onResults(results) {
     //時間処理
     if ((time_difference) > ch_flame) {
         // console.log("ch_flame ", ch_flame);
-        ch_flame = ch_flame + temp_ch_flame;
+        // ch_flame = ch_flame + temp_ch_flame;
 
         if (time_difference > (one_gesture_time * 1000)) {
             ch_flame = temp_ch_flame
@@ -198,6 +207,10 @@ function onResults(results) {
     canvasCtx.restore();
     if (handsign == 1) {
         ex_flg = 1
+    }
+
+    if (new_start_time == 0) {
+        new_start_time = Date.now();
     }
 
 

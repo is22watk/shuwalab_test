@@ -213,6 +213,17 @@ function pre_process_hands(hands_history) {
 }
 let gesture_history = [];
 let cnt = 0;
+
+let new_history_length = 32;
+let new_one_gesture_time = 2.6;
+
+let new_start_time = 0;
+let new_ch_flame = (new_one_gesture_time / new_history_length) * 1000;
+let new_temp_ch_flame = new_ch_flame;
+let new_time_difference = 0;
+
+let flag_cnt = 0
+
 async function recognition(gestures) {
 
     let pose_history = gestures[0];
@@ -266,10 +277,38 @@ async function recognition(gestures) {
 
             console.log(percent, gesture_id)
             console.log(cnt)
+            
+            // console.log(cnt)
+            if (cnt < 16) {
+                new_time_difference = Date.now() - new_start_time;
+
+                if (flag_cnt == 1) {
+                    new_start_time = Date.now();
+                    console.log("new_start_time", new_start_time);
+                    flag_cnt = 0;
+                    cnt = 0;
 
 
-            if (cnt < 48) {
-                cnt += 1;
+                }
+
+                // console.log("flag_cnt",flag_cnt)
+
+                console.log("new_time_difference", new_time_difference)
+                console.log("new_ch_flame", new_ch_flame)
+
+                if ((new_time_difference) > new_ch_flame) {
+                    new_ch_flame = new_ch_flame + new_temp_ch_flame;
+                    cnt += 1;
+
+                    console.log("cnt", cnt);
+                }
+
+                if (new_time_difference > (new_one_gesture_time * 1000)) {
+                    new_ch_flame = new_temp_ch_flame
+                    flag_cnt = 1;
+
+                }
+
                 if (cnt > 32) {
                     if (percent > 0.999) {
                         console.log(gesture_history)
@@ -324,37 +363,43 @@ async function recognition(gestures) {
                 }
 
             } else {
-                if (percent > 0.99) {
+                // if (percent > 0.99) {
 
-                    console.log(gesture_history)
-                    const data = await fetch('/model/label.csv').then(response => response.text());
-                    const rows = data.split('\n').map(row => row.trim());
-                    const labels = rows.map(row => row.split(',')[0]);
-                    result_text = labels[gesture_id];
-                    box = [result_text, percent]
-                    console.log(result_text)
-                    postMessage(box);
-                    // gesture_history = [];
-                    gesture_history.splice(0, gesture_history.length);
-                    cnt = 0;
+                //     console.log(gesture_history)
+                //     const data = await fetch('/model/label.csv').then(response => response.text());
+                //     const rows = data.split('\n').map(row => row.trim());
+                //     const labels = rows.map(row => row.split(',')[0]);
+                //     result_text = labels[gesture_id];
+                //     box = [result_text, percent]
+                //     console.log(result_text)
+                //     postMessage(box);
+                //     // gesture_history = [];
+                //     gesture_history.splice(0, gesture_history.length);
+                //     cnt = 0;
 
-                } if (percent > 0.60) {
-                    gesture_history.push(gesture_id);
-                    console.log(gesture_history)
-                    most_gesture_id = getMostCommonGestureId(gesture_history);
-                    if (most_gesture_id.count >= 5) {
-                        const data = await fetch('/model/label.csv').then(response => response.text());
-                        const rows = data.split('\n').map(row => row.trim());
-                        const labels = rows.map(row => row.split(',')[0]);
-                        result_text = labels[gesture_id];
-                        box = [result_text, percent]
-                        console.log(result_text)
-                        postMessage(box);
-                        // gesture_history = [];
-                        gesture_history.splice(0, gesture_history.length);
-                        cnt = 0;
-                    }
-                }
+                // } if (percent > 0.60) {
+                //     gesture_history.push(gesture_id);
+                //     console.log(gesture_history)
+                //     most_gesture_id = getMostCommonGestureId(gesture_history);
+                //     if (most_gesture_id.count >= 5) {
+                //         const data = await fetch('/model/label.csv').then(response => response.text());
+                //         const rows = data.split('\n').map(row => row.trim());
+                //         const labels = rows.map(row => row.split(',')[0]);
+                //         result_text = labels[gesture_id];
+                //         box = [result_text, percent]
+                //         console.log(result_text)
+                //         postMessage(box);
+                //         // gesture_history = [];
+                //         gesture_history.splice(0, gesture_history.length);
+                //         cnt = 0;
+                //     }
+                // }
+                
+                box = ["error", 1];
+                postMessage(box);
+                cnt = 0;
+
+
             }
 
 
