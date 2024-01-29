@@ -14,13 +14,13 @@ let shuwa = "none";
 let number=0;
 
 //カメラのサイズ
-// const width= 1280;
-// const height= 720;
+const width= 1280;
+const height= 720;
 
 // const width= 1400;
 // const height= 900;
-const width= 960;
-const height= 640;
+// const width= 960;
+// const height= 640;
 
 //カーソル用webworker作成からデータを受け取る記述
 handsign_worker.addEventListener('message', function (e) {
@@ -65,145 +65,177 @@ for(let i=0;i<21;i++){
     right_history.push([]);
 }
 
+// 手話の特長点取得フレーム・時間設定
+let one_gesture_time = 2.6;
+// 時間設定に必要な変数を宣言
+let start_time = 0;
+let ch_flame = (one_gesture_time / 16) * 1000;
+let temp_ch_flame = ch_flame;
+let time_difference = (one_gesture_time * 1000)
+let flag = 1
+
+
 //常に実行され続ける関数的な奴
 function onResults(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0,canvasElement.width, canvasElement.height);
 
+    if (flag == 1) {
+        temp = start_time;
+        start_time = Date.now() - (time_difference - (one_gesture_time * 1000));
+        flag = 0;
+    }
 
-    //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+    time_difference = Date.now() - start_time;
+    // console.log("time_difference", time_difference);
 
-    //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
-    if(results.poseLandmarks){
+    //時間処理
 
-        //検出した33個の特徴点のうち認識に必要な点だけを抽出
-        use_pose_landmarks = results.poseLandmarks.slice(11,17);
-        for(let i=0;i<6;i++){
-            // x座標を反転
-            let flippedX = 1 - use_pose_landmarks[i].x;
-            pose[i] = [flippedX,use_pose_landmarks[i].y];
+    if ((time_difference) > ch_flame) {
+        // console.log("ch_flame ", ch_flame);
+        ch_flame = ch_flame + temp_ch_flame;
+
+        if (time_difference > (one_gesture_time * 1000)) {
+            ch_flame = temp_ch_flame
+            flag = 1;
         }
 
-        true_pose=[];
-        for (let i = 0; i < pose.length; i += 2) {
-            if (i + 1 < pose.length) {
-                // 奇数番目の特徴点と偶数番目の特徴点を入れ替えて新しい配列に格納
-                true_pose.push(pose[i + 1], pose[i]);
-            } else {
-                // 配列の長さが奇数の場合、最後の特徴点はそのまま追加
-                true_pose.push(pose[i]);
+
+        //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+
+        //poseLandmarks(肩肘手首)を検知したら動作。if文の必要性は要検討
+        if(results.poseLandmarks){
+
+            //検出した33個の特徴点のうち認識に必要な点だけを抽出
+            use_pose_landmarks = results.poseLandmarks.slice(11,17);
+            for(let i=0;i<6;i++){
+                // x座標を反転
+                let flippedX = 1 - use_pose_landmarks[i].x;
+                pose[i] = [flippedX,use_pose_landmarks[i].y];
+            }
+
+            true_pose=[];
+            for (let i = 0; i < pose.length; i += 2) {
+                if (i + 1 < pose.length) {
+                    // 奇数番目の特徴点と偶数番目の特徴点を入れ替えて新しい配列に格納
+                    true_pose.push(pose[i + 1], pose[i]);
+                } else {
+                    // 配列の長さが奇数の場合、最後の特徴点はそのまま追加
+                    true_pose.push(pose[i]);
+                }
+            }
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            // console.log("main_true_pose",true_pose)走ってる
+            pose_landmarks=clac_landmark_list(width,height,true_pose);
+            // console.log("main_pose_landmarks",pose_landmarks)
+            // console.log("main_pose_landmarks",pose_landmarks)
+            for(let i=0;i<6;i++){
+                pose_history[i].push(pose_landmarks[i]);
+                //16フレーム分保持。それ以上は削除
+                if(pose_history[i][sanjuni]){
+                    pose_history[i].shift();
+                }
+            }
+        }else{
+            for(let i=0;i<6;i++){
+                //検出されなかったら[0,0]を挿入
+                pose_history[i].push([0,0]);
+                if(pose_history[i][sanjuni]){
+                    pose_history[i].shift();
+                }
             }
         }
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        // console.log("main_true_pose",true_pose)走ってる
-        pose_landmarks=clac_landmark_list(width,height,true_pose);
-        // console.log("main_pose_landmarks",pose_landmarks)
-        // console.log("main_pose_landmarks",pose_landmarks)
-        for(let i=0;i<6;i++){
-            pose_history[i].push(pose_landmarks[i]);
-            //16フレーム分保持。それ以上は削除
-            if(pose_history[i][sanjuni]){
-                pose_history[i].shift();
+        //leftHandLandmarks(左手)を検知したら動作
+        if(results.leftHandLandmarks){
+            for(let i=0;i<21;i++){
+                // x座標を反転
+                let flippedX = 1 - results.leftHandLandmarks[i].x;
+                left[i] = [flippedX,results.leftHandLandmarks[i].y];
             }
+        
+        
+            //検出した左手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成。
+            results.leftHandLandmarks[0]=results.poseLandmarks[15];
         }
-    }else{
-        for(let i=0;i<6;i++){
-            //検出されなかったら[0,0]を挿入
-            pose_history[i].push([0,0]);
-            if(pose_history[i][sanjuni]){
-                pose_history[i].shift();
+        //rightHandLandmarks(右手)を検知したら動作
+        if(results.rightHandLandmarks){
+            for(let i=0;i<21;i++){
+                // x座標を反転
+                let flippedX = 1 - results.rightHandLandmarks[i].x;
+                right[i] = [flippedX,results.rightHandLandmarks[i].y];
             }
+            results.rightHandLandmarks[0]=results.poseLandmarks[16];
         }
-    }
-    //leftHandLandmarks(左手)を検知したら動作
-    if(results.leftHandLandmarks){
-        for(let i=0;i<21;i++){
-            // x座標を反転
-            let flippedX = 1 - results.leftHandLandmarks[i].x;
-            left[i] = [flippedX,results.leftHandLandmarks[i].y];
-        }
-    
-       
-        //検出した左手の特徴点(手首)とposeLandmarksの特徴点(手首)の合成。
-        results.leftHandLandmarks[0]=results.poseLandmarks[15];
-    }
-    //rightHandLandmarks(右手)を検知したら動作
-    if(results.rightHandLandmarks){
-        for(let i=0;i<21;i++){
-            // x座標を反転
-            let flippedX = 1 - results.rightHandLandmarks[i].x;
-            right[i] = [flippedX,results.rightHandLandmarks[i].y];
-        }
-        results.rightHandLandmarks[0]=results.poseLandmarks[16];
-    }
-    if(results.leftHandLandmarks){
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        left_landmarks=clac_landmark_list(width,height,right);
-        for(let i=0;i<21;i++){
-            left_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    // 古い要素を削除
-                    array.shift();
-                 }
-            });
-            left_history[i].push(left_landmarks[i]);
-            left_history.forEach(array => {
-                while (array.length > sanjuni) {
+        if(results.leftHandLandmarks){
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            left_landmarks=clac_landmark_list(width,height,right);
+            for(let i=0;i<21;i++){
+                left_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        // 古い要素を削除
+                        array.shift();
+                    }
+                });
+                left_history[i].push(left_landmarks[i]);
+                left_history.forEach(array => {
+                    while (array.length > sanjuni) {
 
+                        array.shift();
+                    }
+                });
+                
+            }
+        }else{
+            for(let i=0;i<21;i++){
+                left_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        // 古い要素を削除
+                        array.shift();
+                    }
+                });
+                left_history[i].push([0,0]);}
+                left_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        // 古い要素を削除
+                        array.shift();
+                    }
+                });
+                
+            }
+        if(results.rightHandLandmarks){
+            //clac_landmark_listでデータの計算(gesture.jsの関数)
+            right_landmarks=clac_landmark_list(width,height,left);
+            for(let i=0;i<21;i++){
+                right_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        array.shift();
+                    }
+                });
+                right_history[i].push(right_landmarks[i]);
+                right_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        array.shift();
+                    }
+                });
+            }
+        }else{
+            for(let i=0;i<21;i++){
+                right_history.forEach(array => {
+                    while (array.length > sanjuni) {
+                        array.shift();
+                    }
+                });
+                right_history[i].push([0,0]);
+                right_history.forEach(array => {
+                    while (array.length > sanjuni) {
                     array.shift();
-                }
-            });
-            
-        }
-    }else{
-        for(let i=0;i<21;i++){
-            left_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    // 古い要素を削除
-                    array.shift();
-                 }
-            });
-            left_history[i].push([0,0]);}
-            left_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    // 古い要素を削除
-                    array.shift();
-                 }
-            });
-            
-        }
-    if(results.rightHandLandmarks){
-        //clac_landmark_listでデータの計算(gesture.jsの関数)
-        right_landmarks=clac_landmark_list(width,height,left);
-        for(let i=0;i<21;i++){
-            right_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    array.shift();
-                }
-            });
-            right_history[i].push(right_landmarks[i]);
-            right_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    array.shift();
-                }
-            });
-        }
-    }else{
-        for(let i=0;i<21;i++){
-            right_history.forEach(array => {
-                while (array.length > sanjuni) {
-                    array.shift();
-                }
-            });
-            right_history[i].push([0,0]);
-            right_history.forEach(array => {
-                while (array.length > sanjuni) {
-                array.shift();
-                }
-            });
-        }
-    } 
+                    }
+                });
+            }
+        } 
+
+    }
     
     //特徴点と点をつなぐ線の表示(pose)
     drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
