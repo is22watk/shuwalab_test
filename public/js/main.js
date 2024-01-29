@@ -59,11 +59,11 @@ for (let i = 0; i < 21; i++) {
 
 
 // 手話の特長点取得フレーム・時間設定
-let history_length = 16;
+
 let one_gesture_time = 2.6;
 // 時間設定に必要な変数を宣言
 let start_time = 0;
-let ch_flame = (one_gesture_time / history_length) * 1000;
+let ch_flame = (one_gesture_time / 16) * 1000;
 let temp_ch_flame = ch_flame;
 let time_difference = (one_gesture_time * 1000)
 let flag = 1

@@ -249,7 +249,7 @@ async function recognition(gestures) {
 
                     }
 
-                    console.log("www")
+                    
 
 
 
