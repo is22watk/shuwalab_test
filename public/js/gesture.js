@@ -77,8 +77,12 @@ function clac_landmark_list(width,height,landmarks){
     let landmark_x;
     let landmark_y;
     landmarks.forEach(function(landmark,_){
-        landmark_x = Math.min(Math.floor(landmark.x * width), width - 1);
-        landmark_y = Math.min(Math.floor(landmark.y * height), height - 1);
+        // console.log("main_landmark",landmark)値が入ってる
+        // console.log("main_landmarks[0]",landmark[0])
+        // landmark_x = Math.min(Math.floor(landmark.x * width), width - 1);
+        // landmark_y = Math.min(Math.floor(landmark.y * height), height - 1);
+        landmark_x = Math.min(Math.floor(landmark[0] * width), width - 1);
+        landmark_y = Math.min(Math.floor(landmark[1] * height), height - 1);
         landmark_point.push([landmark_x, landmark_y]);
         // console.log("ｘ座標、ｙ座標")
         // console.log(landmark_x,landmark_y)
@@ -113,6 +117,7 @@ function pre_process_pose(pose_history){
         for(point=0;point<temp_pose_list.length;point++){
             temp_pose_list[point][flame][0] = (temp_pose_list[point][flame][0] - center_point[0]) / div_value
             temp_pose_list[point][flame][1] = (temp_pose_list[point][flame][1] - center_point[1]) / div_value
+            // console.log("temp_pose_list[point][flame][0]::",temp_pose_list[point][flame][0])
         }
     }
     // console.log("temp_pose_list.length::",temp_pose_list.length)
@@ -135,6 +140,7 @@ function pre_process_pose(pose_history){
 function pre_process_hands(hands_history){
 
     let temp_hands_list =  JSON.parse(JSON.stringify(hands_history.slice(1,21)));
+    // console.log("temp_hands_list::",temp_hands_list)
     let hand_history = hands_history
     let max_value;
     let flame_mask = temp_hands_list[1].length;
@@ -144,6 +150,7 @@ function pre_process_hands(hands_history){
     for(num=0;num<temp_hands_list.length;num++){
         //console.log("temp_hands_list.length::",temp_hands_list.length)
         for(flame=0;flame<16;flame++){
+            // console.log("temp_hands_list[num][flame][0]::",temp_hands_list[num][flame][0])
             temp_hands_list[num][flame][0] = temp_hands_list[num][flame][0] - hand_history[0][flame][0]
             temp_hands_list[num][flame][1] = temp_hands_list[num][flame][1] - hand_history[0][flame][1]
             // console.log("相対 x  y")
@@ -268,9 +275,9 @@ async function recognition(gestures){
                 console.log(cnt)
                 
                 
-                if (cnt < 48) {
+                if (cnt < 32) {
                     cnt += 1;
-                    if(cnt > 32){
+                    if(cnt > 20){
                         if (percent > 0.999) {
                             console.log(gesture_history)
                             const data = await fetch('/model/label.csv').then(response => response.text());
